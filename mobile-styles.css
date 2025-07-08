@@ -1,0 +1,286 @@
+/**
+ * Trường Phát Computer - Mobile Optimizations
+ * Styles optimized for mobile performance
+ */
+
+/* Loading overlay */
+.initial-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #0f172a;
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+
+.initial-loading.fade-out {
+  opacity: 0;
+}
+
+.loading-content {
+  text-align: center;
+  color: white;
+}
+
+.loading-logo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.loading-text {
+  margin-top: 1rem;
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Offline notification */
+#offline-notification {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #f97316;
+  color: white;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  z-index: 9999;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  animation: slideDown 0.3s ease-out;
+}
+
+.offline-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+.offline-content h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.offline-content p {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+/* Lazy loading animation */
+.lazy-image {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  filter: blur(5px);
+}
+
+.lazy-loaded {
+  opacity: 1;
+  filter: blur(0);
+}
+
+/* Data-saving mode for slow connections */
+.slow-connection .decorative-element {
+  display: none !important;
+}
+
+.slow-connection .heavy-effect {
+  display: none !important;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  /* Game grid optimizations */
+  #game-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+  
+  .game-option {
+    padding: 0.75rem !important;
+  }
+  
+  .game-image {
+    height: 100px !important;
+    object-fit: cover !important;
+  }
+  
+  .game-name {
+    font-size: 0.9rem !important;
+    margin-top: 0.5rem !important;
+  }
+  
+  /* CPU selection optimizations */
+  .cpu-options {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .cpu-option {
+    width: 100% !important;
+    max-width: 300px !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Component selection optimizations */
+  .components-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .component-card {
+    padding: 1rem !important;
+  }
+  
+  .component-options {
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Final configuration optimizations */
+  .final-config-container {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .component-image {
+    max-width: 120px !important;
+    max-height: 120px !important;
+  }
+  
+  /* Button optimizations */
+  .btn, button {
+    padding: 0.6rem 1.2rem !important;
+    font-size: 0.9rem !important;
+    min-height: 44px !important; /* Touch target size */
+  }
+  
+  /* Improve scrolling performance */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Make forms more usable on mobile */
+  input, select, textarea {
+    font-size: 16px !important; /* Prevent zoom on focus in iOS */
+    padding: 0.6rem !important;
+    min-height: 44px !important; /* Touch target size */
+  }
+  
+  /* Reduce animation complexity on mobile */
+  .animate__animated {
+    animation-duration: 0.3s !important;
+  }
+  
+  /* Optimize step indicator */
+  .steps-container {
+    padding: 0 !important;
+  }
+  
+  .step {
+    padding: 0.3rem !important;
+  }
+  
+  /* Optimize tooltips and popovers */
+  .tippy-box {
+    max-width: 250px !important;
+    font-size: 0.8rem !important;
+  }
+  
+  /* Optimize cards and glass effect */
+  .glass, .card {
+    backdrop-filter: none !important; /* Disable for performance */
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  /* Hide non-critical decorative elements */
+  .decorative-element {
+    display: none !important;
+  }
+  
+  /* Optimize table layouts */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    font-size: 0.9rem !important;
+  }
+  
+  /* Improve touch area for selectable items */
+  .selectable-item {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* Small mobile devices (< 480px) */
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.5rem !important;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem !important;
+  }
+  
+  #game-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .budget-display {
+    font-size: 1.8rem !important;
+  }
+  
+  /* Simplified step indicator */
+  .step-title {
+    display: none !important; /* Hide text on very small screens */
+  }
+  
+  .step-number {
+    width: 2rem !important;
+    height: 2rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  /* Stack header items */
+  .header-content {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem !important;
+  }
+  
+  .logo {
+    font-size: 1.2rem !important;
+  }
+  
+  /* Adjust contact buttons */
+  .contact-links {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  
+  .contact-links a {
+    width: 100% !important;
+    text-align: center !important;
+  }
+} 
