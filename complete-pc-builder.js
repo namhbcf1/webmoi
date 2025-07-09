@@ -1171,7 +1171,13 @@ function displayFinalConfiguration() {
         </tbody>
     </table>`;
 
-    document.getElementById('final-config-table').innerHTML = tableHTML;
+    const finalConfigElement = document.getElementById('final-config-table');
+    if (finalConfigElement) {
+        finalConfigElement.innerHTML = tableHTML;
+    } else {
+        console.error('❌ Element final-config-table not found');
+        return;
+    }
     
     // Đảm bảo hiển thị đầy đủ HDD và Monitor ngay sau khi tạo bảng
     setTimeout(() => {

@@ -133,9 +133,11 @@ self.addEventListener('fetch', event => {
       .then(cachedResponse => {
         const fetchPromise = fetch(event.request)
           .then(networkResponse => {
+            // Clone response before using it
+            const responseClone = networkResponse.clone();
             // Update cache with new response
             caches.open(CACHE_NAME)
-              .then(cache => cache.put(event.request, networkResponse.clone()));
+              .then(cache => cache.put(event.request, responseClone));
             return networkResponse;
           });
           

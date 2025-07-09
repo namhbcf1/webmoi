@@ -1,11 +1,11 @@
 {
-  "name": "TRUONG PHAT COMPUTER PC Builder",
+  "name": "Trường Phát Computer - PC Builder",
   "short_name": "TPC Builder",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#222831",
-  "theme_color": "#222831",
-  "description": "Xây dựng cấu hình PC chuyên nghiệp, tối ưu cho mọi thiết bị.",
+  "background_color": "#0f172a",
+  "theme_color": "#4facfe",
+  "description": "Tư vấn và lắp ráp PC Gaming chuyên nghiệp. Chọn cấu hình phù hợp với ngân sách và game yêu thích.",
   "icons": [
     {
       "src": "./images/icon-192.png",

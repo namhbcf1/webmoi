@@ -14,7 +14,32 @@
     <!-- Force hardware acceleration on Safari -->
     <meta name="mobile-web-app-capable" content="yes">
     
-    <title>Trường Phát Computer - PC Builder</title>
+    <title>Trường Phát Computer - PC Builder | Tư vấn cấu hình PC Gaming</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Tư vấn và lắp ráp PC Gaming chuyên nghiệp tại Trường Phát Computer. Chọn cấu hình phù hợp với ngân sách và game yêu thích. Liên hệ 0836.768.597">
+    <meta name="keywords" content="PC Gaming, lắp ráp PC, cấu hình PC, PC Builder, Trường Phát Computer, tư vấn PC">
+    <meta name="author" content="Trường Phát Computer">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Trường Phát Computer - PC Builder">
+    <meta property="og:description" content="Tư vấn và lắp ráp PC Gaming chuyên nghiệp. Chọn cấu hình phù hợp với ngân sách và game yêu thích.">
+    <meta property="og:image" content="./images/icon-192.png">
+    <meta property="og:url" content="https://namhbcf1.github.io/webmoi/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Trường Phát Computer">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Trường Phát Computer - PC Builder">
+    <meta name="twitter:description" content="Tư vấn và lắp ráp PC Gaming chuyên nghiệp">
+    <meta name="twitter:image" content="./images/icon-192.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./images/icon-192.png">
+    <link rel="apple-touch-icon" href="./images/icon-192.png">
+
     <link rel="manifest" href="./manifest.json">
     <link rel="stylesheet" href="./mobile-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -25,8 +50,28 @@
     <!-- Preload critical assets -->
     <link rel="preload" href="./complete-pc-builder.js" as="script">
     <link rel="preload" href="./js/configs/index.js" as="script">
-    <link rel="preload" href="./images/components/cpu.jpg" as="image">
-    <link rel="preload" href="./images/components/mainboard.jpg" as="image">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Trường Phát Computer",
+        "description": "Tư vấn và lắp ráp PC Gaming chuyên nghiệp",
+        "url": "https://namhbcf1.github.io/webmoi/",
+        "telephone": "0836768597",
+        "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "VN"
+        },
+        "sameAs": [
+            "https://www.facebook.com/tpcom.hb/",
+            "https://zalo.me/0836768597"
+        ],
+        "serviceType": "PC Building, Computer Assembly, Gaming PC",
+        "areaServed": "Vietnam"
+    }
+    </script>
     
     <style>
         * {

@@ -1,10 +1,10 @@
-11# 🖥️ PC Builder - Trường Phát Computer Hòa Bình
+# 🖥️ PC Builder - Trường Phát Computer
 
-Ứng dụng web thông minh để cấu hình PC cho **Trường Phát Computer Hòa Bình** - chuyên kinh doanh linh kiện máy tính tại Hòa Bình.
+Ứng dụng web thông minh để cấu hình PC cho **Trường Phát Computer** - chuyên kinh doanh linh kiện máy tính chính hãng.
 
 ## 🌟 Demo Live
 
-Truy cập: **https://namhbcf1.github.io/new/**
+Truy cập: **https://namhbcf1.github.io/webmoi/**
 
 ## ✨ Tính năng chính
 
@@ -41,8 +41,8 @@ Truy cập: **https://namhbcf1.github.io/new/**
 
 ```bash
 # Clone repository
-git clone https://github.com/namhbcf1/new.git
-cd new
+git clone https://github.com/namhbcf1/webmoi.git
+cd webmoi
 
 # Cài đặt dependencies
 npm install
