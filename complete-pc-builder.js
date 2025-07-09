@@ -1,4 +1,6 @@
-// Complete PC Builder JavaScript
+// Complete PC Builder JavaScript - Cross-Browser Compatible
+// ================================================================
+
 // Global variables
 let currentStep = 1;
 let selectedBudget = 15;
@@ -6,23 +8,284 @@ let selectedCPU = null;
 let selectedGame = null;
 let currentConfig = {};
 
-// Lazy loading for images
+// Cross-browser device detection utility
+const DeviceDetector = {
+    // Comprehensive mobile detection for all devices and browsers
+    isMobile: function() {
+        // User agent detection for mobile devices
+        const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i;
+        const userAgentMobile = mobileRegex.test(navigator.userAgent);
+
+        // Screen size detection
+        const screenMobile = window.innerWidth <= 768 || window.innerHeight <= 768;
+
+        // Touch capability detection
+        const touchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+
+        // Orientation detection (mobile devices typically support orientation change)
+        const orientationSupport = 'orientation' in window || 'onorientationchange' in window;
+
+        // Combine all detection methods for maximum accuracy
+        return userAgentMobile || (screenMobile && touchCapable) || (touchCapable && orientationSupport);
+    },
+
+    // Specific device detection
+    isIOS: function() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    },
+
+    isAndroid: function() {
+        return /Android/.test(navigator.userAgent);
+    },
+
+    isSafari: function() {
+        return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    },
+
+    isChrome: function() {
+        return /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    },
+
+    isFirefox: function() {
+        return /Firefox/.test(navigator.userAgent);
+    },
+
+    isEdge: function() {
+        return /Edge|Edg/.test(navigator.userAgent);
+    },
+
+    // Performance capability detection
+    isLowPerformance: function() {
+        // Detect low-performance devices
+        const cores = navigator.hardwareConcurrency || 2;
+        const memory = navigator.deviceMemory || 2;
+        const connection = navigator.connection;
+
+        const lowCores = cores <= 2;
+        const lowMemory = memory <= 2;
+        const slowConnection = connection && (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g');
+
+        return lowCores || lowMemory || slowConnection;
+    }
+};
+
+// Global mobile detection variable for backward compatibility
+const isMobile = DeviceDetector.isMobile();
+
+// Cross-browser compatibility utilities
+const BrowserCompat = {
+    // Polyfill for requestAnimationFrame
+    requestAnimationFrame: function(callback) {
+        return window.requestAnimationFrame ||
+               window.webkitRequestAnimationFrame ||
+               window.mozRequestAnimationFrame ||
+               window.oRequestAnimationFrame ||
+               window.msRequestAnimationFrame ||
+               function(callback) { setTimeout(callback, 1000 / 60); };
+    }(),
+
+    // Cross-browser event listener
+    addEventListener: function(element, event, handler, options) {
+        if (element.addEventListener) {
+            try {
+                element.addEventListener(event, handler, options);
+            } catch (e) {
+                // Fallback for browsers that don't support options
+                element.addEventListener(event, handler, false);
+            }
+        } else if (element.attachEvent) {
+            // IE8 and below
+            element.attachEvent('on' + event, handler);
+        }
+    },
+
+    // Cross-browser CSS property setting
+    setStyle: function(element, property, value) {
+        if (element.style) {
+            // Handle vendor prefixes
+            const prefixes = ['', '-webkit-', '-moz-', '-ms-', '-o-'];
+            prefixes.forEach(prefix => {
+                try {
+                    element.style[prefix + property] = value;
+                } catch (e) {
+                    // Ignore unsupported properties
+                }
+            });
+        }
+    },
+
+    // Cross-browser class manipulation
+    addClass: function(element, className) {
+        if (element.classList) {
+            element.classList.add(className);
+        } else {
+            // IE9 and below
+            element.className += ' ' + className;
+        }
+    },
+
+    removeClass: function(element, className) {
+        if (element.classList) {
+            element.classList.remove(className);
+        } else {
+            // IE9 and below
+            element.className = element.className.replace(new RegExp('\\b' + className + '\\b', 'g'), '');
+        }
+    },
+
+    // Cross-browser smooth scroll
+    smoothScrollTo: function(top) {
+        if ('scrollBehavior' in document.documentElement.style) {
+            window.scrollTo({ top: top, behavior: 'smooth' });
+        } else {
+            // Fallback for browsers without smooth scroll support
+            const start = window.pageYOffset;
+            const distance = top - start;
+            const duration = 500;
+            let startTime = null;
+
+            function animation(currentTime) {
+                if (startTime === null) startTime = currentTime;
+                const timeElapsed = currentTime - startTime;
+                const run = ease(timeElapsed, start, distance, duration);
+                window.scrollTo(0, run);
+                if (timeElapsed < duration) {
+                    BrowserCompat.requestAnimationFrame(animation);
+                }
+            }
+
+            function ease(t, b, c, d) {
+                t /= d / 2;
+                if (t < 1) return c / 2 * t * t + b;
+                t--;
+                return -c / 2 * (t * (t - 2) - 1) + b;
+            }
+
+            BrowserCompat.requestAnimationFrame(animation);
+        }
+    }
+};
+
+// Performance monitoring system
+const PerformanceMonitor = {
+    metrics: {
+        loadTime: 0,
+        renderTime: 0,
+        interactionTime: 0,
+        errors: []
+    },
+
+    startTime: performance.now ? performance.now() : Date.now(),
+
+    // Track page load performance
+    trackLoadTime: function() {
+        const endTime = performance.now ? performance.now() : Date.now();
+        this.metrics.loadTime = endTime - this.startTime;
+        console.log(`📊 Page load time: ${Math.round(this.metrics.loadTime)}ms`);
+    },
+
+    // Track render performance
+    trackRender: function(operation, callback) {
+        const startTime = performance.now ? performance.now() : Date.now();
+
+        BrowserCompat.requestAnimationFrame(() => {
+            callback();
+            const endTime = performance.now ? performance.now() : Date.now();
+            const renderTime = endTime - startTime;
+            this.metrics.renderTime += renderTime;
+
+            if (renderTime > 16.67) { // More than 60fps threshold
+                console.warn(`⚠️ Slow render detected for ${operation}: ${Math.round(renderTime)}ms`);
+            }
+        });
+    },
+
+    // Track errors
+    trackError: function(error, context) {
+        this.metrics.errors.push({
+            error: error.message || error,
+            context: context,
+            timestamp: Date.now(),
+            userAgent: navigator.userAgent,
+            url: window.location.href
+        });
+        console.error(`❌ Error in ${context}:`, error);
+    },
+
+    // Get performance report
+    getReport: function() {
+        return {
+            ...this.metrics,
+            device: {
+                isMobile: DeviceDetector.isMobile(),
+                isLowPerformance: DeviceDetector.isLowPerformance(),
+                browser: this.getBrowserInfo()
+            }
+        };
+    },
+
+    getBrowserInfo: function() {
+        const ua = navigator.userAgent;
+        if (DeviceDetector.isChrome()) return 'Chrome';
+        if (DeviceDetector.isFirefox()) return 'Firefox';
+        if (DeviceDetector.isSafari()) return 'Safari';
+        if (DeviceDetector.isEdge()) return 'Edge';
+        return 'Unknown';
+    }
+};
+
+// Cross-browser performance optimization
+const PerformanceOptimizer = {
+    // Optimize based on device capabilities
+    getOptimalSettings: function() {
+        const isLowPerf = DeviceDetector.isLowPerformance();
+        const isMobileDevice = DeviceDetector.isMobile();
+
+        return {
+            animationDuration: isLowPerf ? 150 : (isMobileDevice ? 200 : 300),
+            particleCount: isLowPerf ? 10 : (isMobileDevice ? 30 : 80),
+            imageQuality: isLowPerf ? 'low' : 'high',
+            enableComplexEffects: !isLowPerf && !isMobileDevice,
+            lazyLoadThreshold: isMobileDevice ? '50px' : '100px'
+        };
+    }
+};
+
+// Enhanced lazy loading with cross-browser support
 function setupLazyLoading() {
+    const settings = PerformanceOptimizer.getOptimalSettings();
+
     if ('IntersectionObserver' in window) {
         const imageObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const img = entry.target;
                     if (img.dataset.src) {
-                        img.src = img.dataset.src;
-                        img.removeAttribute('data-src');
-                        img.classList.remove('lazy');
+                        // Add loading class for smooth transition
+                        img.classList.add('loading');
+
+                        // Create new image to preload
+                        const newImg = new Image();
+                        newImg.onload = function() {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                            img.classList.remove('lazy', 'loading');
+                            img.classList.add('loaded');
+                        };
+                        newImg.onerror = function() {
+                            img.src = 'images/components/default.jpg';
+                            img.classList.remove('lazy', 'loading');
+                            img.classList.add('error');
+                        };
+                        newImg.src = img.dataset.src;
+
                         observer.unobserve(img);
                     }
                 }
             });
         }, {
-            rootMargin: '50px 0px',
+            rootMargin: settings.lazyLoadThreshold,
             threshold: 0.01
         });
 
@@ -30,10 +293,11 @@ function setupLazyLoading() {
             imageObserver.observe(img);
         });
     } else {
-        // Fallback for older browsers
+        // Fallback for older browsers (IE, old Safari)
         document.querySelectorAll('img[data-src]').forEach(img => {
             img.src = img.dataset.src;
             img.removeAttribute('data-src');
+            img.classList.remove('lazy');
         });
     }
 }
@@ -90,58 +354,184 @@ function updateStepStates() {
     });
 }
 
-// Mobile detection and optimization
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-
-// Show mobile loading indicator
+// Cross-browser mobile loading indicators
 function showMobileLoading() {
-    if (isMobile) {
+    if (DeviceDetector.isMobile()) {
         const loader = document.getElementById('mobile-loading');
-        if (loader) loader.classList.add('show');
+        if (loader) {
+            loader.classList.add('show');
+            // Ensure visibility across all browsers
+            loader.style.display = 'block';
+        }
     }
 }
 
 function hideMobileLoading() {
-    if (isMobile) {
+    if (DeviceDetector.isMobile()) {
         const loader = document.getElementById('mobile-loading');
-        if (loader) loader.classList.remove('show');
+        if (loader) {
+            loader.classList.remove('show');
+            // Use setTimeout for smooth transition across browsers
+            setTimeout(() => {
+                if (!loader.classList.contains('show')) {
+                    loader.style.display = 'none';
+                }
+            }, 300);
+        }
     }
 }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', function() {
-    showMobileLoading();
+// Cross-browser initialization with comprehensive device support and error handling
+BrowserCompat.addEventListener(document, 'DOMContentLoaded', function() {
+    try {
+        console.log('🚀 Initializing Trường Phát Computer PC Builder...');
+        PerformanceMonitor.trackLoadTime();
 
-    updateBudgetDisplay();
-    loadGames();
-    updateStepStates();
-    setupLazyLoading(); // Initialize lazy loading
+        // Show loading indicator
+        showMobileLoading();
 
-    // Mobile-specific optimizations
-    if (isMobile) {
-        // Disable complex animations on mobile
-        document.documentElement.style.setProperty('--animation-duration', '0.2s');
+        // Get optimal settings for current device
+        const settings = PerformanceOptimizer.getOptimalSettings();
+        const isMobileDevice = DeviceDetector.isMobile();
 
-        // Add touch-friendly event listeners
-        document.addEventListener('touchstart', function() {}, { passive: true });
-        document.addEventListener('touchmove', function() {}, { passive: true });
+        // Apply device-specific optimizations
+        if (isMobileDevice) {
+            // Mobile optimizations
+            BrowserCompat.setStyle(document.documentElement, 'animation-duration', settings.animationDuration + 'ms');
 
-        console.log('📱 Mobile optimizations applied');
-    }
+            // Add touch-friendly event listeners with cross-browser support
+            const addTouchListener = (event, handler, options) => {
+                BrowserCompat.addEventListener(document, event, handler, options);
+            };
 
-    console.log('🚀 Trường Phát Computer PC Builder initialized');
+            addTouchListener('touchstart', function() {}, { passive: true });
+            addTouchListener('touchmove', function() {}, { passive: true });
+            addTouchListener('touchend', function() {}, { passive: true });
 
-    // Setup budget slider
-    const budgetSlider = document.getElementById('budget-slider');
-    if (budgetSlider) {
-        budgetSlider.addEventListener('input', function(e) {
-            selectedBudget = parseInt(e.target.value);
-            updateBudgetDisplay();
-            updateStepStates(); // Cập nhật trạng thái step khi thay đổi budget
+            // iOS-specific optimizations
+            if (DeviceDetector.isIOS()) {
+                // Prevent zoom on input focus
+                const metaViewport = document.querySelector('meta[name="viewport"]');
+                if (metaViewport) {
+                    metaViewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+                }
+
+                // Fix iOS Safari bounce effect
+                BrowserCompat.setStyle(document.body, 'overscroll-behavior', 'none');
+                BrowserCompat.setStyle(document.body, '-webkit-overflow-scrolling', 'touch');
+            }
+
+            // Android-specific optimizations
+            if (DeviceDetector.isAndroid()) {
+                // Optimize for Android Chrome
+                BrowserCompat.setStyle(document.documentElement, '-webkit-tap-highlight-color', 'transparent');
+                BrowserCompat.setStyle(document.documentElement, 'tap-highlight-color', 'transparent');
+            }
+
+            console.log('📱 Mobile optimizations applied for:', navigator.userAgent);
+        } else {
+            // Desktop optimizations
+            BrowserCompat.setStyle(document.documentElement, 'animation-duration', settings.animationDuration + 'ms');
+            console.log('🖥️ Desktop optimizations applied');
+        }
+
+        // Browser-specific optimizations
+        if (DeviceDetector.isSafari()) {
+            // Safari-specific fixes
+            BrowserCompat.setStyle(document.body, '-webkit-transform', 'translateZ(0)');
+            BrowserCompat.setStyle(document.body, 'transform', 'translateZ(0)');
+        } else if (DeviceDetector.isFirefox()) {
+            // Firefox-specific optimizations
+            BrowserCompat.setStyle(document.documentElement, 'scroll-behavior', 'smooth');
+        } else if (DeviceDetector.isEdge()) {
+            // Edge-specific optimizations
+            BrowserCompat.setStyle(document.body, '-ms-overflow-style', 'scrollbar');
+        }
+
+        // Initialize core functionality with performance tracking
+        PerformanceMonitor.trackRender('Core Initialization', () => {
+            try {
+                updateBudgetDisplay();
+                loadGames();
+                updateStepStates();
+                setupLazyLoading();
+
+                console.log('✅ Core functionality initialized');
+            } catch (error) {
+                PerformanceMonitor.trackError(error, 'Core Initialization');
+
+                // Fallback initialization
+                setTimeout(() => {
+                    try {
+                        updateBudgetDisplay();
+                        loadGames();
+                        console.log('✅ Fallback initialization completed');
+                    } catch (e) {
+                        PerformanceMonitor.trackError(e, 'Fallback Initialization');
+                        console.error('❌ All initialization attempts failed');
+                    }
+                }, 1000);
+            }
         });
-    }
 
-    hideMobileLoading();
+        // Setup budget slider with cross-browser support
+        const budgetSlider = document.getElementById('budget-slider');
+        if (budgetSlider) {
+            const handleSliderChange = function(e) {
+                try {
+                    selectedBudget = parseInt(e.target.value);
+                    updateBudgetDisplay();
+                    updateStepStates();
+                } catch (error) {
+                    PerformanceMonitor.trackError(error, 'Budget Slider');
+                }
+            };
+
+            // Add multiple event listeners for cross-browser compatibility
+            BrowserCompat.addEventListener(budgetSlider, 'input', handleSliderChange);
+            BrowserCompat.addEventListener(budgetSlider, 'change', handleSliderChange); // For IE
+            BrowserCompat.addEventListener(budgetSlider, 'propertychange', handleSliderChange); // For old IE
+        }
+
+        // Global error handler
+        window.onerror = function(message, source, lineno, colno, error) {
+            PerformanceMonitor.trackError({
+                message: message,
+                source: source,
+                line: lineno,
+                column: colno,
+                error: error
+            }, 'Global Error Handler');
+            return false; // Don't prevent default error handling
+        };
+
+        // Unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function(event) {
+            PerformanceMonitor.trackError(event.reason, 'Unhandled Promise Rejection');
+        });
+
+        // Hide loading indicator
+        setTimeout(() => {
+            hideMobileLoading();
+            console.log('🎉 PC Builder fully loaded and ready!');
+            console.log('📊 Performance Report:', PerformanceMonitor.getReport());
+        }, 500);
+
+    } catch (error) {
+        PerformanceMonitor.trackError(error, 'DOMContentLoaded');
+        console.error('❌ Critical initialization error:', error);
+
+        // Emergency fallback
+        setTimeout(() => {
+            try {
+                hideMobileLoading();
+                updateBudgetDisplay();
+                console.log('🆘 Emergency fallback completed');
+            } catch (e) {
+                console.error('❌ Emergency fallback failed:', e);
+            }
+        }, 2000);
+    }
 });
 
 function updateBudgetDisplay() {
@@ -183,58 +573,117 @@ function selectCPU(cpu) {
 
 function loadGames() {
     const gameGrid = document.getElementById('game-grid');
-    if (!gameGrid) return;
+    if (!gameGrid) {
+        console.warn('Game grid element not found');
+        return;
+    }
 
     showMobileLoading();
 
-    // Show loading skeleton first
+    const settings = PerformanceOptimizer.getOptimalSettings();
+    const isMobileDevice = DeviceDetector.isMobile();
+
+    // Show loading skeleton first with device-optimized animations
     gameGrid.innerHTML = games.map((game, index) => `
-        <div class="game-option skeleton" data-game="${game.id}" style="animation-delay: ${index * 100}ms">
+        <div class="game-option skeleton" data-game="${game.id}"
+             style="animation-delay: ${index * (isMobileDevice ? 50 : 100)}ms">
             <div class="game-image skeleton"></div>
             <div class="game-name skeleton"></div>
         </div>
     `).join('');
 
-    // Load actual content with animation and lazy loading
-    const loadDelay = isMobile ? 500 : 1000; // Faster loading on mobile
-    setTimeout(() => {
-        gameGrid.innerHTML = games.map((game, index) => `
-            <div class="game-option glow" data-game="${game.id}" onclick="selectGame('${game.id}')"
-                 data-tilt data-aos="zoom-in" data-aos-delay="${index * (isMobile ? 25 : 50)}">
-                <img data-src="${game.image}" alt="${game.name}" class="game-image lazy"
-                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='100%25' height='100%25' fill='%23334155'/%3E%3C/svg%3E"
-                     onerror="this.src='images/components/default.jpg'">
-                <div class="game-name">${game.name}</div>
-            </div>
-        `).join('');
+    // Load actual content with cross-browser optimized animations
+    const loadDelay = isMobileDevice ? 300 : 600;
 
-        // Setup lazy loading for the newly added images
-        setupLazyLoading();
-        hideMobileLoading();
-        
-        // Re-initialize tilt effect for new elements with mobile optimization
-        const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (!isMobile) {
-            VanillaTilt.init(gameGrid.querySelectorAll("[data-tilt]"), {
-                max: 10,
-                speed: 400,
-                glare: true,
-                "max-glare": 0.1,
+    setTimeout(() => {
+        try {
+            const animationDelay = isMobileDevice ? 15 : 25;
+
+            gameGrid.innerHTML = games.map((game, index) => `
+                <div class="game-option glow" data-game="${game.id}"
+                     onclick="selectGame('${game.id}')"
+                     data-tilt="${!isMobileDevice}"
+                     data-aos="zoom-in"
+                     data-aos-delay="${index * animationDelay}"
+                     role="button"
+                     tabindex="0"
+                     aria-label="Select ${game.name}">
+                    <img data-src="${game.image}"
+                         alt="${game.name}"
+                         class="game-image lazy"
+                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='100%25' height='100%25' fill='%23334155'/%3E%3C/svg%3E"
+                         onerror="this.src='images/components/default.jpg'"
+                         loading="lazy">
+                    <div class="game-name">${game.name}</div>
+                </div>
+            `).join('');
+
+            // Setup lazy loading for the newly added images
+            setupLazyLoading();
+
+            // Initialize tilt effect based on device capabilities
+            if (typeof VanillaTilt !== 'undefined') {
+                try {
+                    if (!isMobileDevice && settings.enableComplexEffects) {
+                        // Desktop: full tilt effect
+                        VanillaTilt.init(gameGrid.querySelectorAll("[data-tilt='true']"), {
+                            max: 10,
+                            speed: 400,
+                            glare: true,
+                            "max-glare": 0.1,
+                            perspective: 1000
+                        });
+                    } else if (isMobileDevice && !DeviceDetector.isLowPerformance()) {
+                        // Mobile with good performance: light tilt effect
+                        VanillaTilt.init(gameGrid.querySelectorAll("[data-tilt='true']"), {
+                            max: 3,
+                            speed: 800,
+                            glare: false,
+                            scale: 1.01
+                        });
+                    }
+                    // Low performance devices: no tilt effect
+                } catch (tiltError) {
+                    console.warn('VanillaTilt initialization failed:', tiltError);
+                }
+            }
+
+            // Initialize AOS animations if available and performance allows
+            if (typeof AOS !== 'undefined' && settings.enableComplexEffects) {
+                try {
+                    AOS.refresh();
+                } catch (aosError) {
+                    console.warn('AOS refresh failed:', aosError);
+                }
+            }
+
+            // Add keyboard navigation support for accessibility
+            gameGrid.querySelectorAll('.game-option').forEach(option => {
+                option.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
             });
-        } else {
-            // Mobile: lighter tilt effect
-            VanillaTilt.init(gameGrid.querySelectorAll("[data-tilt]"), {
-                max: 3,
-                speed: 800,
-                glare: false,
-                scale: 1.01,
-            });
+
+            hideMobileLoading();
+            console.log('✅ Games loaded successfully');
+
+        } catch (error) {
+            console.error('❌ Error loading games:', error);
+            hideMobileLoading();
+
+            // Fallback: simple game loading without animations
+            gameGrid.innerHTML = games.map(game => `
+                <div class="game-option" data-game="${game.id}" onclick="selectGame('${game.id}')">
+                    <img src="${game.image}" alt="${game.name}" class="game-image"
+                         onerror="this.src='images/components/default.jpg'">
+                    <div class="game-name">${game.name}</div>
+                </div>
+            `).join('');
         }
-        
-        // Re-initialize AOS for new elements
-        AOS.refresh();
-    }, 800);
+    }, loadDelay);
 }
 
 function selectGame(gameId) {
@@ -321,45 +770,46 @@ function nextStep() {
                 }
             });
             
-            // Add particle burst effect optimized for mobile
+            // Add particle burst effect optimized for all devices
             if (window.particlesJS) {
-                const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                
+                const isMobileDevice = DeviceDetector.isMobile();
+                const isLowPerf = DeviceDetector.isLowPerformance();
+
                 // Temporarily increase particle count for celebration
-                const originalParticleCount = isMobile ? 30 : 80;
-                const celebrationCount = isMobile ? 60 : 150; // Giảm 60% trên mobile
+                const originalParticleCount = isLowPerf ? 15 : (isMobileDevice ? 30 : 80);
+                const celebrationCount = isLowPerf ? 30 : (isMobileDevice ? 60 : 150);
                 
                 particlesJS('particles-js', {
                     particles: {
                         number: { value: celebrationCount, density: { enable: true, value_area: 800 }},
                         color: { value: ['#4facfe', '#00f2fe', '#22c55e', '#f59e0b'] },
-                        shape: { type: isMobile ? 'circle' : ['circle', 'star'] }, // Chỉ circle trên mobile
-                        opacity: { value: isMobile ? 0.6 : 0.8, random: true },
-                        size: { value: isMobile ? 3 : 5, random: true },
+                        shape: { type: isLowPerf ? 'circle' : (isMobileDevice ? 'circle' : ['circle', 'star']) },
+                        opacity: { value: isLowPerf ? 0.4 : (isMobileDevice ? 0.6 : 0.8), random: true },
+                        size: { value: isLowPerf ? 2 : (isMobileDevice ? 3 : 5), random: true },
                         move: {
                             enable: true,
-                            speed: isMobile ? 4 : 6,
+                            speed: isLowPerf ? 2 : (isMobileDevice ? 4 : 6),
                             direction: 'none',
                             random: true,
                             straight: false,
                             out_mode: 'out',
-                            bounce: !isMobile // Tắt bounce trên mobile
+                            bounce: !isMobileDevice && !isLowPerf
                         }
                     }
                 });
                 
-                // Reset particles after shorter time on mobile
-                const resetTime = isMobile ? 2000 : 3000;
+                // Reset particles after device-appropriate time
+                const resetTime = isLowPerf ? 1500 : (isMobileDevice ? 2000 : 3000);
                 setTimeout(() => {
                     particlesJS('particles-js', {
                         particles: {
                             number: { value: originalParticleCount, density: { enable: true, value_area: 800 }},
                             color: { value: '#4facfe' },
                             shape: { type: 'circle' },
-                            opacity: { value: isMobile ? 0.3 : 0.5, random: false },
-                            size: { value: isMobile ? 2 : 3, random: true },
+                            opacity: { value: isLowPerf ? 0.2 : (isMobileDevice ? 0.3 : 0.5), random: false },
+                            size: { value: isLowPerf ? 1 : (isMobileDevice ? 2 : 3), random: true },
                             line_linked: {
-                                enable: !isMobile, // Tắt lines trên mobile
+                                enable: !isMobileDevice && !isLowPerf,
                                 distance: 150,
                                 color: '#4facfe',
                                 opacity: 0.4,
@@ -367,7 +817,7 @@ function nextStep() {
                             },
                             move: {
                                 enable: true,
-                                speed: isMobile ? 1 : 2,
+                                speed: isLowPerf ? 0.5 : (isMobileDevice ? 1 : 2),
                                 direction: 'none',
                                 random: false,
                                 straight: false,
@@ -377,7 +827,7 @@ function nextStep() {
                         },
                         interactivity: {
                             events: {
-                                onhover: { enable: !isMobile, mode: 'repulse' }
+                                onhover: { enable: !isMobileDevice && !isLowPerf, mode: 'repulse' }
                             }
                         }
                     });
@@ -389,10 +839,16 @@ function nextStep() {
     currentStep++;
     showStep(currentStep);
 
-    // Mobile optimizations
-    if (isMobile) {
+    // Device-specific optimizations
+    const isMobileDevice = DeviceDetector.isMobile();
+    if (isMobileDevice) {
         // Scroll to top for better mobile UX
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (e) {
+            // Fallback for older browsers
+            window.scrollTo(0, 0);
+        }
 
         // Hide loading after a short delay
         setTimeout(() => {

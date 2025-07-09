@@ -472,14 +472,32 @@
             opacity: 1;
         }
 
-        /* Loading placeholder */
+        /* Loading placeholder with cross-browser support */
         .game-image.lazy {
             background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
             background-size: 200% 100%;
             animation: loading 1.5s infinite;
+            -webkit-animation: loading 1.5s infinite;
+            -moz-animation: loading 1.5s infinite;
+            -o-animation: loading 1.5s infinite;
         }
 
         @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        @-webkit-keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        @-moz-keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        @-o-keyframes loading {
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
@@ -851,7 +869,127 @@
                 padding: 0.75rem 0.5rem;
             }
         }
-        
+
+        /* Cross-browser compatibility enhancements */
+
+        /* Flexbox fallbacks for older browsers */
+        .game-grid {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-orient: horizontal;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: row;
+            flex-direction: row;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+        }
+
+        /* Grid fallbacks for IE */
+        @supports not (display: grid) {
+            .game-grid {
+                display: -webkit-box;
+                display: -ms-flexbox;
+                display: flex;
+                -ms-flex-wrap: wrap;
+                flex-wrap: wrap;
+            }
+
+            .game-option {
+                -webkit-box-flex: 0;
+                -ms-flex: 0 0 calc(25% - 1rem);
+                flex: 0 0 calc(25% - 1rem);
+                margin: 0.5rem;
+            }
+        }
+
+        /* Safari-specific fixes */
+        @supports (-webkit-appearance: none) {
+            .budget-slider {
+                -webkit-appearance: none;
+            }
+
+            .budget-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+            }
+
+            input, select, textarea {
+                -webkit-appearance: none;
+                -webkit-border-radius: 0;
+            }
+        }
+
+        /* Firefox-specific fixes */
+        @-moz-document url-prefix() {
+            .budget-slider {
+                -moz-appearance: none;
+            }
+
+            .btn {
+                -moz-user-select: none;
+            }
+        }
+
+        /* Edge-specific fixes */
+        @supports (-ms-ime-align: auto) {
+            .game-grid {
+                display: -ms-flexbox;
+                -ms-flex-wrap: wrap;
+            }
+
+            .game-option {
+                -ms-flex: 0 0 calc(25% - 1rem);
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .btn, .cpu-option, .game-option {
+                border: 2px solid;
+            }
+
+            .btn:focus, .cpu-option:focus, .game-option:focus {
+                outline: 3px solid;
+                outline-offset: 2px;
+            }
+        }
+
+        /* Reduced motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+
+            .game-option, .cpu-option, .btn {
+                transition: none !important;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .mobile-loading, .particles-js, .step-navigation {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            .card, .step-content {
+                border: 1px solid #000 !important;
+                background: white !important;
+                color: black !important;
+            }
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 0 0.75rem;
@@ -1108,6 +1246,9 @@
 
     <!-- Main PC Builder Script -->
     <script src="complete-pc-builder.js" defer></script>
+
+    <!-- Cross-Browser Test Suite -->
+    <script src="cross-browser-test.js" defer></script>
     
           <!-- Ultra-lightweight script for 60fps performance -->
       <script>
